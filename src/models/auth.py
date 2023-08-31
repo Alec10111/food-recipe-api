@@ -8,5 +8,5 @@ class TokenModel(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    user_id: str = None
+    user_email: str = None
     exp: int = None

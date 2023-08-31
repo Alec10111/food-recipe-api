@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Body, status, HTTPException
 from fastapi.responses import JSONResponse
-
 from fastapi.encoders import jsonable_encoder
-
 from setup import users_collection
+from src.auth.utils import get_hashed_password
 from src.models.users import UserModel
 
 router = APIRouter(prefix="/users",
@@ -14,6 +13,7 @@ router = APIRouter(prefix="/users",
 @router.post("/", response_description="Create a new user", response_model=UserModel)
 def create_user(user: UserModel = Body(...)):
     user = jsonable_encoder(user)
+    user["password"] = get_hashed_password(user["password"])
     new_user = users_collection.insert_one(user)
     created_user = users_collection.find_one({"_id": new_user.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_user)

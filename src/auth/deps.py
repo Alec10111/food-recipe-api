@@ -1,30 +1,18 @@
-from typing import Union, Any
 from datetime import datetime
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-
-from main import app
-from .utils import (
-    ALGORITHM,
-    JWT_SECRET_KEY
-)
-
 from jose import jwt
 from pydantic import ValidationError
 
+from setup import settings, users_collection
+from .utils import reusable_oauth
 from ..models.auth import TokenPayload
 from ..models.users import UserModel
-
-reusable_oauth = OAuth2PasswordBearer(
-    tokenUrl="/login",
-    scheme_name="JWT"
-)
 
 
 async def get_current_user(token: str = Depends(reusable_oauth)) -> UserModel:
     try:
         payload = jwt.decode(
-            token, JWT_SECRET_KEY, algorithms=[ALGORITHM]
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
 
@@ -41,7 +29,7 @@ async def get_current_user(token: str = Depends(reusable_oauth)) -> UserModel:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user: Union[dict[str, Any], None] = app.db["users"].find_one({"_id": token_data.user_id})
+    user = users_collection.find_one({"email": token_data.user_email})
 
     if user is None:
         raise HTTPException(

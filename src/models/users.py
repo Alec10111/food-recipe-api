@@ -1,6 +1,5 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field, SecretStr, EmailStr
-
 from src.models.utils import PyObjectId
 
 
@@ -9,7 +8,7 @@ class UserModel(BaseModel):
     username: str
     fullname: str
     email: EmailStr = Field(unique=True, index=True)
-    hashed_password: SecretStr
+    password: str
 
     class Config:
         allow_population_by_field_name = True
@@ -20,7 +19,7 @@ class UserModel(BaseModel):
                 "username": "Dolly21",
                 "fullname": "Dolly Pardon",
                 "email": "dollyna@gmail.com",
-                "hashed_password": "notsohashed111",
+                "password": "notsohashed111",
             }
         }
 

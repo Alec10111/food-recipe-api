@@ -1,5 +1,5 @@
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-import os
 from datetime import datetime, timedelta
 from typing import Union, Any
 from jose import jwt
@@ -7,7 +7,10 @@ from jose import jwt
 from setup import settings
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+reusable_oauth = OAuth2PasswordBearer(
+    tokenUrl="/login",
+    scheme_name="JWT"
+)
 
 def get_hashed_password(password: str) -> str:
     return password_context.hash(password)
@@ -23,7 +26,7 @@ def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> 
     else:
         expires_delta = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    to_encode = {"exp": expires_delta, "user_email": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, settings.ALGORITHM)
     return encoded_jwt
 
