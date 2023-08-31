@@ -23,7 +23,7 @@ class RecipeModel(BaseModel):
     description: str
     ingredients: List[IngredientModel]
     steps: List[StepModel]
-    createdBy: str
+    createdBy: str or None = None
 
     class Config:
         allow_population_by_field_name = True

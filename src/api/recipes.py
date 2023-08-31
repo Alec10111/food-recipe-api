@@ -1,18 +1,21 @@
 from typing import List
 
-from fastapi import HTTPException, Body, Request, status, APIRouter
+from fastapi import HTTPException, Body, Request, status, APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from setup import recipes_collection
+from src.auth.deps import get_current_user
 from src.models.recipes import RecipeModel, UpdateRecipeModel
+from src.models.users import UserModel
 
 router = APIRouter(prefix="/recipes",
                    tags=["Recipes"])
 
 
 @router.post("/", response_description="Create a new recipe", response_model=RecipeModel)
-async def create_recipe(request: Request, recipe: RecipeModel = Body(...)):
+async def create_recipe(user: UserModel = Depends(get_current_user), recipe: RecipeModel = Body(...)):
+    recipe.createdBy = user.id
     recipe = jsonable_encoder(recipe)
     new_recipe = recipes_collection.insert_one(recipe)
     created_recipe = recipes_collection.find_one({"_id": new_recipe.inserted_id})
@@ -34,18 +37,14 @@ async def list_recipes(request: Request):
 
 
 @router.put("/{recipe_id}")
-async def update_recipe(request: Request, recipe_id: str, recipe: UpdateRecipeModel = Body(...)):
-    # TODO add check on
-    recipe = {k: v for k, v in recipe.dict().items() if v is not None}
-    if len(recipe) >= 1:
-        update_result = recipes_collection.update_one({"_id": recipe_id}, {"$set": recipe})
-
-        if update_result.modified_count == 1:
-            if (
-                    updated_recipe := recipes_collection.find_one({"_id": recipe_id})
-            ) is not None:
-                return updated_recipe
-
+async def update_recipe(recipe_id: str, user: UserModel = Depends(get_current_user),
+                        recipe: UpdateRecipeModel = Body(...)):
+    existing_recipe = recipes_collection.find_one({"_id": recipe_id})
+    if existing_recipe["createdBy"] != str(user.id):
+        raise HTTPException(status_code=403, detail="You can only update recipes created by you")
+    recipe_data = recipe.dict(exclude_unset=True)
+    if len(recipe_data) >= 1:
+        recipes_collection.update_one({"_id": recipe_id}, {"$set": recipe_data})
     if (existing_recipe := recipes_collection.find_one({"_id": recipe_id})) is not None:
         return existing_recipe
 
