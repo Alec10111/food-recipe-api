@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.env
+
+# Dependency directories
+lib/python*/
+lib64/python*/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python environment
+venv/
+env/
+ENV/
+
+# Compiled Python files
+*.pyc
+*.pyo
+__pycache__/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Local configuration
+.pytest_cache/
+.coverage
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# FastAPI-generated files
+alembic.ini
+alembic/
