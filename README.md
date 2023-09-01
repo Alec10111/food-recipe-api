@@ -4,12 +4,8 @@ This project is a Food Recipes API built using FastAPI and MongoDB, with JWT aut
 ### Features
 - Create, retrieve, list, update, and delete food recipes. 
 - User registration and login with JWT authentication. 
-- Secure endpoints using JWT tokens. 
-- MongoDB used as the database backend. 
+- Secure endpoints using JWT tokens.
 - Docker Compose setup for easy deployment.
-
-### Tech stack
-The API was built with Fastapi
 
 ## Getting Started
 
@@ -25,7 +21,7 @@ These instructions will help you set up and run the project on your local machin
 Clone the repository (or unzip it if provided as a zip):
 
 ```bash
-git clone https://github.com/your-username/food-recipes-api.git
+git clone https://github.com/Alec10111/food-recipe-api
 cd food-recipes-api
 ```
 ```bash
@@ -57,7 +53,7 @@ Update the environment variables in the `.env` file according to your preference
 ```txt
 MONGO_CONNECTION_STRING="mongodb://mongo:27017/"
 ```
-matching the service name in the compose yaml. Otherwise you use `localhost` instead of `mongo`
+matching the service name in the compose yaml. Otherwise use `localhost` instead of `mongo`
 
 ### Running with Docker Compose
 
@@ -88,7 +84,7 @@ If you are using IDE like pycharm you can also run and debug the tests directly 
 ## Usage
 
 ### Recipes
-Recipes consists of title, description, ingredients and steps. They also have information of the user that created them.
+Recipes consists of title, description, a list of ingredients and a list steps. They also have information of the user that created them.
 Using the available endpoints for `/recipes` you can 
 - create a recipe
 - retrieve a single recipe
@@ -157,9 +153,8 @@ A json example to create a user:
 }
 ```
 - retrieving a user
-- list all users (only displays id and username)
+- list all users
 - retrieving current user
 
 ### Auth
-In order to access all the endpoints in the project you will need to login. You can do it directly in the docs page clicking the 'Authorize' button and entering correct username and password for an existing user
-- Get request for recipes (list and retrieve) can be accessed without login.
+In order to access all the endpoints in the project you will need to login. The protected endpoints appear with a lock icon on the docs page. You can login directly in the docs page clicking the 'Authorize' button and entering correct username and password for an existing user, allowing usage of the protected endpoints.

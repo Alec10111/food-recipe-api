@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import HTTPException, Body, Request, status, APIRouter, Depends
+from fastapi import HTTPException, Body, status, APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
@@ -22,7 +22,7 @@ async def create_recipe(user: UserInDBModel = Depends(get_current_user), recipe:
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_recipe)
 
 
-@router.get("/{recipe_id}")
+@router.get("/{recipe_id}", response_description="Retrieve a single recipe", response_model=RecipeModel)
 async def retrieve_recipe(recipe_id: str):
     recipe = recipes_collection.find_one({"_id": recipe_id})
     if recipe is not None:
@@ -39,7 +39,7 @@ async def list_recipes(ingredients: str = ""):
     return list(recipes)
 
 
-@router.put("/{recipe_id}")
+@router.put("/{recipe_id}", response_description="Update a recipe", response_model=RecipeModel)
 async def update_recipe(recipe_id: str, user: UserInDBModel = Depends(get_current_user),
                         recipe_updates: UpdateRecipeModel = Body(...)):
     existing_recipe = recipes_collection.find_one({"_id": recipe_id})
@@ -54,7 +54,7 @@ async def update_recipe(recipe_id: str, user: UserInDBModel = Depends(get_curren
     raise HTTPException(status_code=404, detail=f"Recipe {recipe_id} not found")
 
 
-@router.delete("/{recipe_id}")
+@router.delete("/{recipe_id}", response_description="Delete a recipe")
 async def delete_recipe(recipe_id: str, user: UserInDBModel = Depends(get_current_user)):
     recipe = recipes_collection.find_one({"_id": recipe_id})
     if recipe is not None:

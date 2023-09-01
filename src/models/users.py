@@ -1,7 +1,6 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field, SecretStr, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr
 
-from setup import users_collection
 from src.models.utils import PyObjectId
 
 
