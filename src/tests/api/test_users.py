@@ -4,13 +4,14 @@ client = TestClient(app)
 
 
 def test_create_user():
-    response = client.post("/users", json=SAMPLE_USER)
+    response = client.post("/users", json=get_random_user_json())
     assert response.status_code == 201
 
 
 def test_create_user_existing_email(user):
-    SAMPLE_USER["email"] = user["email"]
-    response = client.post("/users", json=SAMPLE_USER)
+    new_user = get_random_user_json()
+    new_user["email"] = user["email"]
+    response = client.post("/users", json=new_user)
     assert response.status_code == 400
 
 

@@ -22,14 +22,15 @@ SAMPLE_RECIPE = {
     }],
 }
 
-# Mocking a sample user document
-f = faker.Faker()
-SAMPLE_USER = {
-    "username": f.simple_profile()["username"],
-    "fullname": "test",
-    "email": f.email(),
-    "password": hash_password("testpassword"),
-}
+
+def get_random_user_json():
+    f = faker.Faker()
+    return {
+        "username": f.simple_profile()["username"],
+        "fullname": "test",
+        "email": f.email(),
+        "password": hash_password("testpassword"),
+    }
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -39,7 +40,7 @@ def api_client():
 
 
 # Insert the sample recipe into the test collection
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def recipe(user):
     recipe = RecipeModel(**SAMPLE_RECIPE)
     recipe.createdBy = user["_id"]
@@ -51,7 +52,7 @@ def recipe(user):
 # Insert the sample user into the test user collection
 @pytest.fixture(scope="module")
 def user():
-    user = UserInDBModel(**SAMPLE_USER)
+    user = UserInDBModel(**get_random_user_json())
     user = users_collection.insert_one(jsonable_encoder(user))
     yield users_collection.find_one({"_id": user.inserted_id})
     users_collection.delete_one({"_id": user.inserted_id})

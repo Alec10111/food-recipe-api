@@ -13,8 +13,6 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - db:/data/db
+      - ./db:/data/db
     environment:
       MONGO_INITDB_DATABASE: recipe_app_db
-volumes:
-  db:

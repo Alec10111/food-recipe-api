@@ -38,7 +38,8 @@ def test_filter_list_recipes_negative(recipe):
 
 
 def test_filter_list_recipes(recipe):
-    response = client.get("/recipes?ingredients=Eggs")
+    ingredient = recipe["ingredients"][0]["name"]
+    response = client.get(f"/recipes?ingredients={ingredient}")
     assert response.status_code == 200
     assert len(response.json()) >= 1
 
