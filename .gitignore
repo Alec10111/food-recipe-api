@@ -29,12 +29,9 @@ ENV/
 # Compiled Python files
 *.pyc
 *.pyo
-__pycache__/
 
 # Logs and databases
 *.log
-*.sqlite
-*.db
 
 # Local configuration
 .pytest_cache/

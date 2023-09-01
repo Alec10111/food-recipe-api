@@ -4,12 +4,12 @@ from jose import jwt
 from pydantic import ValidationError
 
 from setup import settings, users_collection
-from .utils import reusable_oauth
+from .utils import oauth
 from ..models.auth import TokenPayload
-from ..models.users import UserModel
+from ..models.users import UserInDBModel
 
 
-async def get_current_user(token: str = Depends(reusable_oauth)) -> UserModel:
+async def get_current_user(token: str = Depends(oauth)) -> UserInDBModel:
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -37,4 +37,4 @@ async def get_current_user(token: str = Depends(reusable_oauth)) -> UserModel:
             detail="Could not find user",
         )
 
-    return UserModel(**user)
+    return UserInDBModel(**user)

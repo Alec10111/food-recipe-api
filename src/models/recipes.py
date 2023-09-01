@@ -3,12 +3,12 @@ from typing import List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
-from src.models.users import UserModel
+from src.models.users import UserInDBModel
 from src.models.utils import PyObjectId
 
 
 class IngredientModel(BaseModel):
-    ingredient_id: str
+    name: str
     quantity: str
 
 
@@ -33,7 +33,7 @@ class RecipeModel(BaseModel):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "ingredients": [
-                {"ingredient_id": "ingredient_id_1", "quantity": "1 unit"}
+                {"name": "ingredient_1", "quantity": "1 unit"}
             ],
             "steps": [
                 {"order": 1, "description": "Step 1"}

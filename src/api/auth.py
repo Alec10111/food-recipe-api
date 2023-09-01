@@ -5,14 +5,14 @@ from setup import users_collection
 from src.auth.deps import get_current_user
 from src.auth.utils import verify_password, create_access_token, create_refresh_token
 from src.models.auth import TokenModel
-from src.models.users import UserModel
+from src.models.users import UserInDBModel
 
 router = APIRouter(prefix="",
                    tags=["Auth"])
 
 
-@router.get('/me', summary='Get details of currently logged in user', response_model=UserModel)
-async def get_me(user: UserModel = Depends(get_current_user)):
+@router.get('/me', summary='Get details of currently logged in user', response_model=UserInDBModel)
+async def get_me(user: UserInDBModel = Depends(get_current_user)):
     return user
 
 

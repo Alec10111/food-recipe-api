@@ -7,14 +7,14 @@ from fastapi.encoders import jsonable_encoder
 from setup import recipes_collection
 from src.auth.deps import get_current_user
 from src.models.recipes import RecipeModel, UpdateRecipeModel
-from src.models.users import UserModel
+from src.models.users import UserInDBModel
 
 router = APIRouter(prefix="/recipes",
                    tags=["Recipes"])
 
 
 @router.post("/", response_description="Create a new recipe", response_model=RecipeModel)
-async def create_recipe(user: UserModel = Depends(get_current_user), recipe: RecipeModel = Body(...)):
+async def create_recipe(user: UserInDBModel = Depends(get_current_user), recipe: RecipeModel = Body(...)):
     recipe.createdBy = user.id
     recipe = jsonable_encoder(recipe)
     new_recipe = recipes_collection.insert_one(recipe)
@@ -31,13 +31,16 @@ async def retrieve_recipe(recipe_id: str):
 
 
 @router.get("/", response_description="List all recipes", response_model=List[RecipeModel])
-async def list_recipes():
-    recipes = recipes_collection.find()
+async def list_recipes(ingredients: str = ""):
+    if ingredients:
+        recipes = recipes_collection.find({"ingredients.name": {"$all": ingredients.split(",")}})
+    else:
+        recipes = recipes_collection.find()
     return list(recipes)
 
 
 @router.put("/{recipe_id}")
-async def update_recipe(recipe_id: str, user: UserModel = Depends(get_current_user),
+async def update_recipe(recipe_id: str, user: UserInDBModel = Depends(get_current_user),
                         recipe_updates: UpdateRecipeModel = Body(...)):
     existing_recipe = recipes_collection.find_one({"_id": recipe_id})
     if existing_recipe is not None:
@@ -52,7 +55,7 @@ async def update_recipe(recipe_id: str, user: UserModel = Depends(get_current_us
 
 
 @router.delete("/{recipe_id}")
-async def delete_recipe(recipe_id: str, user: UserModel = Depends(get_current_user)):
+async def delete_recipe(recipe_id: str, user: UserInDBModel = Depends(get_current_user)):
     recipe = recipes_collection.find_one({"_id": recipe_id})
     if recipe is not None:
         if recipe["createdBy"] != str(user.id):

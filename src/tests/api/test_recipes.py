@@ -25,14 +25,27 @@ def test_retrieve_nonexistent_recipe():
     assert response.status_code == 404
 
 
-def test_list_recipes():
+def test_list_recipes(recipe):
     response = client.get("/recipes")
     assert response.status_code == 200
     assert len(response.json()) >= 1
 
 
-def test_update_recipe(user_auth, recipe):
-    _, token = user_auth
+def test_filter_list_recipes_negative(recipe):
+    response = client.get("/recipes?ingredients=randomIngredient")
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+
+
+def test_filter_list_recipes(recipe):
+    response = client.get("/recipes?ingredients=Eggs")
+    assert response.status_code == 200
+    assert len(response.json()) >= 1
+
+
+def test_update_recipe(recipe):
+    user = users_collection.find_one({"_id": recipe["createdBy"]})
+    token = create_access_token(user["email"])
     updated_data = {"title": "Updated Recipe Title"}
     response = client.put(f"/recipes/{recipe['_id']}", json=updated_data, headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200

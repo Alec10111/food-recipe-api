@@ -1,18 +1,19 @@
+import faker
 import pytest
 from fastapi.encoders import jsonable_encoder
 from fastapi.testclient import TestClient
 from main import app
 from setup import users_collection, recipes_collection
-from src.auth.utils import create_access_token, get_hashed_password
+from src.auth.utils import create_access_token, hash_password
 from src.models.recipes import RecipeModel
-from src.models.users import UserModel
+from src.models.users import UserInDBModel
 
 # Mocking a sample recipe document
 SAMPLE_RECIPE = {
     "title": "Sample Recipe",
-    "description": "A test recipe description",
+    "description": "test",
     "ingredients": [{
-        "ingredient_id": "Pasta",
+        "name": "Pasta",
         "quantity": "1 unit"
     }],
     "steps": [{
@@ -22,11 +23,12 @@ SAMPLE_RECIPE = {
 }
 
 # Mocking a sample user document
+f = faker.Faker()
 SAMPLE_USER = {
-    "username": "testuser",
-    "fullname": "test user",
-    "email": "test@example.com",
-    "password": get_hashed_password("testpassword"),
+    "username": f.simple_profile()["username"],
+    "fullname": "test",
+    "email": f.email(),
+    "password": hash_password("testpassword"),
 }
 
 
@@ -49,7 +51,7 @@ def recipe(user):
 # Insert the sample user into the test user collection
 @pytest.fixture(scope="module")
 def user():
-    user = UserModel(**SAMPLE_USER)
+    user = UserInDBModel(**SAMPLE_USER)
     user = users_collection.insert_one(jsonable_encoder(user))
     yield users_collection.find_one({"_id": user.inserted_id})
     users_collection.delete_one({"_id": user.inserted_id})
@@ -58,3 +60,15 @@ def user():
 @pytest.fixture(scope="module")
 def user_auth(user):
     yield user, create_access_token(user["email"])
+    users_collection.delete_one({"_id": user["_id"]})
+
+
+# Clean up after testing
+def cleanup():
+    recipes_collection.delete_many({"description": "test"})
+    users_collection.delete_many({"username": "test"})
+
+
+# Run the cleanup after all tests
+def pytest_sessionfinish(session, exitstatus):
+    cleanup()
