@@ -22,8 +22,7 @@ def create_user(user: UserModel = Body(...)):
 # Get user by ID
 @router.get("/{user_id}", response_model=UserModel)
 async def get_user(user_id: str):
-    user = users_collection.find_one({"_id": user_id})
-    if user is not None:
+    if (user := users_collection.find_one({"_id": user_id})) is not None:
         return user
     raise HTTPException(status_code=404, detail="User not found")
 

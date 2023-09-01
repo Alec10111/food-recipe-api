@@ -23,7 +23,7 @@ async def create_recipe(user: UserModel = Depends(get_current_user), recipe: Rec
 
 
 @router.get("/{recipe_id}")
-async def retrieve_recipe(request: Request, recipe_id: str):
+async def retrieve_recipe(recipe_id: str):
     recipe = recipes_collection.find_one({"_id": recipe_id})
     if recipe is not None:
         return recipe
@@ -31,29 +31,34 @@ async def retrieve_recipe(request: Request, recipe_id: str):
 
 
 @router.get("/", response_description="List all recipes", response_model=List[RecipeModel])
-async def list_recipes(request: Request):
+async def list_recipes():
     recipes = recipes_collection.find()
     return list(recipes)
 
 
 @router.put("/{recipe_id}")
 async def update_recipe(recipe_id: str, user: UserModel = Depends(get_current_user),
-                        recipe: UpdateRecipeModel = Body(...)):
+                        recipe_updates: UpdateRecipeModel = Body(...)):
     existing_recipe = recipes_collection.find_one({"_id": recipe_id})
-    if existing_recipe["createdBy"] != str(user.id):
-        raise HTTPException(status_code=403, detail="You can only update recipes created by you")
-    recipe_data = recipe.dict(exclude_unset=True)
-    if len(recipe_data) >= 1:
-        recipes_collection.update_one({"_id": recipe_id}, {"$set": recipe_data})
-    if (existing_recipe := recipes_collection.find_one({"_id": recipe_id})) is not None:
-        return existing_recipe
-
+    if existing_recipe is not None:
+        if existing_recipe["createdBy"] != str(user.id):
+            raise HTTPException(status_code=403, detail="You can only update recipes created by you")
+        recipe_data = recipe_updates.dict(exclude_unset=True)
+        if len(recipe_data) >= 1:
+            recipes_collection.update_one({"_id": recipe_id}, {"$set": recipe_data})
+        if (existing_recipe := recipes_collection.find_one({"_id": recipe_id})) is not None:
+            return existing_recipe
     raise HTTPException(status_code=404, detail=f"Recipe {recipe_id} not found")
 
 
 @router.delete("/{recipe_id}")
-async def delete_recipe(request: Request, recipe_id: str):
-    result = recipes_collection.delete_one({"_id": recipe_id})
-    if result.deleted_count == 1:
-        return {"message": "Recipe deleted successfully"}
+async def delete_recipe(recipe_id: str, user: UserModel = Depends(get_current_user)):
+    recipe = recipes_collection.find_one({"_id": recipe_id})
+    if recipe is not None:
+        if recipe["createdBy"] != str(user.id):
+            raise HTTPException(status_code=403, detail="You can only recipes recipes created by you")
+
+        result = recipes_collection.delete_one({"_id": recipe_id})
+        if result.deleted_count == 1:
+            return {"message": "Recipe deleted successfully"}
     raise HTTPException(status_code=404, detail="Recipe not found")
